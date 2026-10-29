@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .history {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .history-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .history-entry:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Calculator</h1>
+        <div class="form-group">
+            <label for="operation">Select Operation:</label>
+            <select id="operation">
+                <option value="average">Calculate Average</option>
+                <option value="multiply">Multiply by 2</option>
+            </select>
+        </div>
+        <div id="average-inputs" class="form-group">
+            <label for="numbers">Enter numbers (comma-separated):</label>
+            <input type="text" id="numbers" placeholder="e.g., 2,4,6">
+        </div>
+        <div id="multiply-input" class="form-group" style="display:none;">
+            <label for="number">Enter a number:</label>
+            <input type="number" id="number" placeholder="Enter a number">
+        </div>
+        <button onclick="calculate()">Calculate</button>
+        <div class="result" id="result">
+            Result will appear here
+        </div>
+        <div class="history">
+            <h3>History:</h3>
+            <div id="history"></div>
+        </div>
+    </div>
+
+    <script>
+        // Store history in array
+        let history = [];
+
+        // Show/hide appropriate input based on operation
+        document.getElementById('operation').addEventListener('change', function() {
+            const avgInputs = document.getElementById('average-inputs');
+            const multInput = document.getElementById('multiply-input');
+            if (this.value === 'average') {
+                avgInputs.style.display = 'block';
+                multInput.style.display = 'none';
+            } else {
+                avgInputs.style.display = 'none';
+                multInput.style.display = 'block';
+            }
+        });
+
+        function calculate() {
+            const operation = document.getElementById('operation').value;
+            let result;
+            let inputsStr = '';
+            
+            if (operation === 'average') {
+                const numbersInput = document.getElementById('numbers').value.trim();
+                if (!numbersInput) {
+                    alert('Please enter numbers');
+                    return;
+                }
+                const numbers = numbersInput.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+                if (numbers.length === 0) {
+                    alert('Please enter valid numbers');
+                    return;
+                }
+                inputsStr = numbers.join(', ');
+                // Calculate average
+                if (numbers.length === 0) {
+                    result = null;
+                } else {
+                    const sum = numbers.reduce((a, b) => a + b, 0);
+                    result = sum / numbers.length;
+                }
+            } else if (operation === 'multiply') {
+                const numberInput = document.getElementById('number').value;
+                if (numberInput === '' || isNaN(numberInput)) {
+                    alert('Please enter a valid number');
+                    return;
+                }
+                const number = parseFloat(numberInput);
+                inputsStr = number;
+                result = number * 2;
+            }
+            
+            // Display result
+            const resultDiv = document.getElementById('result');
+            if (result === null) {
+                resultDiv.textContent = 'Result: None (empty list)';
+                resultDiv.style.color = '#ff6b6b';
+            } else {
+                resultDiv.textContent = `Result: ${result}`;
+                resultDiv.style.color = '#28a745';
+            }
+            
+            // Add to history
+            const timestamp = new Date().toLocaleString();
+            history.push({timestamp, operation, inputs: inputsStr, result});
+            updateHistoryDisplay();
+            
+            // Clear inputs
+            if (operation === 'average') {
+                document.getElementById('numbers').value = '';
+            } else {
+                document.getElementById('number').value = '';
+            }
+        }
+        
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '';
+            // Show last 10 entries
+            const recent = history.slice(-10).reverse();
+            recent.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'history-entry';
+                entryDiv.innerHTML = `<strong>${entry.timestamp}</strong> - ${entry.operation}(${entry.inputs}) = ${entry.result}`;
+                historyDiv.appendChild(entryDiv);
+            });
+        }
+        
+        // Initialize display
+        document.getElementById('average-inputs').style.display = 'block';
+        document.getElementById('multiply-input').style.display = 'none';
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "navigator": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "UF NaviGator",
+      "options": {
+        "baseURL": "https://api.ai.it.ufl.edu/v1",
+        "apiKey": "{env:NAVIGATOR_API_KEY}"
+      },
+      "models": {
+        "nemotron-3-super-120b-a12b": { "name": "Nemotron 3 Super 120B" },
+        "nemotron-3-nano-30b-a3b": { "name": "Nemotron 3 Nano 30B" }
+      }
+    }
+  },
+  "model": "navigator/nemotron-3-super-120b-a12b"
+}
