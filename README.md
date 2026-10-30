@@ -124,7 +124,7 @@ Edit `opencode.json` to add your AI provider:
 ### Step 4: Set Environment Variables
 Set required API keys as environment variables:
 ```bash
-export YOUR_API_KEY_ENV_VAR="your-actual-api-key"
+setx NAVIGATOR_API_KEY "your-api-key-here"
 ```
 
 ### Step 5: Run Your Agent
