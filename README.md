@@ -1,121 +1,237 @@
-# Build an Agent - Calculator Project
+# Build an Agent - Agent Development Example
 
-This project demonstrates a simple calculator with history tracking, featuring both a Python backend and a frontend HTML interface.
+This repository demonstrates how to build and run custom AI agents using the OpenCode framework. It includes a working example of a coding partner agent similar to the one you've been interacting with.
 
-## Features
+## What Is an Agent?
 
-- **Average Calculation**: Computes the average of a list of numbers, handling empty lists gracefully.
-- **Multiplication by 2**: Multiplies a given number by 2.
-- **History Tracking**: Logs all calculations with timestamps to a text file.
-- **Interactive HTML Interface**: A user-friendly web interface for performing calculations and viewing history.
+An agent in OpenCode is an AI assistant with specialized capabilities, configuration, and tools designed for specific tasks. Agents can be customized with:
 
-## Files
+- **Specialized instructions** (how the agent should behave)
+- **Tool access** (what capabilities the agent has)
+- **Model selection** (which AI model to use)
+- **Custom skills** (domain-specific knowledge and workflows)
 
-- `calc.py`: Contains the core calculator functions (`average` and `multiply_by_two`).
-- `calc_history.py`: Extends the calculator functions with history logging and provides a history display function.
-- `calculator.html`: An interactive HTML/JavaScript calculator interface with real-time results and history tracking.
-- `server.py`: A simple Python HTTP server to serve the calculator HTML file (optional).
-- `calc_history.txt`: Log file that stores the calculation history (generated automatically).
+## Repository Contents
 
-## Usage
+This repository contains:
+- A working **coding partner agent** configuration (`.opencode/agent/coding-partner.md`)
+- **Agent configuration** (`opencode.json`)
+- **Example project files** (the calculator demo) showing what an agent can help build
+- Documentation on how to create and run your own agents
 
-### Using the Python Functions
+## How Agents Like This Work
 
-You can use the calculator functions directly in Python:
+When you interact with an agent like me, here's what happens behind the scenes:
 
-```python
-import calc
+1. **Configuration Loading**: OpenCode loads the agent's configuration from `.opencode/agent/*` files
+2. **Tool Setup**: The agent is granted access to specific tools (bash, edit, read, write, etc.)
+3. **Model Initialization**: The specified AI model is initialized with the provider settings
+4. **Instruction Following**: The agent follows its built-in instructions plus any custom instructions in its config
+5. **Tool Execution**: When needed, the agent uses its available tools to accomplish tasks
 
-# Calculate average
-print(calc.average([2, 4, 6]))  # Output: 4.0
-print(calc.average([]))         # Output: None
+## Key Configuration Files
 
-# Multiply by 2
-print(calc.multiply_by_two(5))  # Output: 10
-print(calc.multiply_by_two(-3)) # Output: -6
+### 1. Agent Definition (`.opencode/agent/coding-partner.md`)
+```yaml
+---
+description: A friendly general-purpose coding partner
+mode: primary
+model: navigator/nemotron-3-super-120b-a12b
+tools:
+  write: true
+  edit: true
+  bash: true
+  # ... other tools
+---
+```
+This file defines:
+- What the agent does (description)
+- How it operates (mode)
+- Which AI model to use
+- What tools it has access to
+
+### 2. Main Configuration (`opencode.json`)
+```json
+{
+  "provider": {
+    "navigator": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "UF NaviGator",
+      "options": {
+        "baseURL": "https://api.ai.it.ufl.edu/v1",
+        "apiKey": "{env:NAVIGATOR_API_KEY}"
+      },
+      "models": {
+        "nemotron-3-super-120b-a12b": { "name": "Nemotron 3 Super 120B" },
+        "nemotron-3-nano-30b-a3b": { "name": "Nemotron 3 Nano 30B" }
+      }
+    }
+  },
+  "model": "navigator/nemotron-3-super-120b-a12b"
+}
+```
+This file configures:
+- Which AI providers are available
+- API endpoints and authentication
+- Available models
+- Default model selection
+
+## How to Build Your Own Agent
+
+### Step 1: Set Up the Directory Structure
+```bash
+mkdir -p .opencode/agent
 ```
 
-### Using the History Tracking Functions
-
-```python
-import calc_history
-
-# Perform calculations with logging
-avg = calc_history.average_with_log([2, 4, 6])
-print(f"Average: {avg}")
-
-result = calc_history.multiply_by_two_with_log(5)
-print(f"Multiplication result: {result}")
-
-# View history
-calc_history.show_history()
+### Step 2: Create Your Agent Configuration
+Create `.opencode/agent/your-agent-name.md`:
+```yaml
+---
+description: [What your agent does]
+mode: primary  # or "agent" or "orchestrator"
+model: [your-provider/your-model]
+tools:
+  read: true
+  write: true
+  edit: true
+  bash: true
+  # Add other tools your agent needs
+---
+[Your agent's instructions here]
 ```
 
-### Using the HTML Interface
+### Step 3: Configure Provider and Models
+Edit `opencode.json` to add your AI provider:
+```json
+{
+  "provider": {
+    "your-provider-name": {
+      "npm": "[the-npm-package]",
+      "name": "[Display Name]",
+      "options": {
+        "baseURL": "[API endpoint]",
+        "apiKey": "{env:YOUR_API_KEY_ENV_VAR}"
+      },
+      "models": {
+        "your-provider/your-model": { "name": "[Model Display Name]" }
+      }
+    }
+  },
+  "model": "your-provider/your-model"
+}
+```
 
-1. Open `calculator.html` in any web browser (double-click the file or right-click -> "Open with").
-2. Alternatively, run the server:
-   ```bash
-   python server.py
-   ```
-   Then open your browser to `http://localhost:8000`.
+### Step 4: Set Environment Variables
+Set required API keys as environment variables:
+```bash
+export YOUR_API_KEY_ENV_VAR="your-actual-api-key"
+```
 
-3. Select an operation from the dropdown:
-   - **Calculate Average**: Enter comma-separated numbers (e.g., "2,4,6")
-   - **Multiply by 2**: Enter a single number
-4. Click "Calculate" to see the result.
-5. View your calculation history below the result.
+### Step 5: Run Your Agent
+Start OpenCode and select your agent:
+```bash
+opencode
+```
+Then choose your agent from the agent selection menu.
 
-## Requirements
+## Available Tools
 
-- Python 3.x (for the Python scripts and server)
-- Any modern web browser (for the HTML interface)
+Agents can be granted access to various tools:
+- **File operations**: `read`, `write`, `edit`, `glob`, `grep`
+- **System operations**: `bash` (for running commands)
+- **Development aids**: `task` (for spawning subagents), `todowrite` (for task management)
+- **Integrations**: `webfetch`, `skill` (for loading specialized skills)
 
-## How It Works
+## Modes Explained
 
-### Backend (Python)
+- **`primary`**: The main agent that interacts directly with the user
+- **`agent`**: Standard subagents that can be spawned for specific tasks
+- **`orchestrator`**: Agents that manage and coordinate other agents
 
-The `calc.py` module provides basic mathematical operations:
-- `average(numbers)`: Returns the arithmetic mean or `None` for empty lists.
-- `multiply_by_two(number)`: Returns the input multiplied by 2.
+## Customizing Agent Behavior
 
-The `calc_history.py` module wraps these functions to add logging:
-- Each calculation is logged with a timestamp to `calc_history.txt`.
-- The `show_history()` function reads and displays the log file.
+You can customize your agent by:
 
-### Frontend (HTML/JavaScript)
+1. **Modifying instructions**: Edit the text after the YAML frontmatter in your agent's `.md` file
+2. **Adjusting tool access**: Add or remove tools in the `tools:` section
+3. **Changing models**: Update the `model:` field to use different AI models
+4. **Adding skills**: Use the `skill` tool to load specialized capabilities
 
-The `calculator.html` file provides an interactive interface:
-- Uses vanilla JavaScript (no frameworks required).
-- Dynamically shows/hides input fields based on the selected operation.
-- Performs calculations client-side for instant feedback.
-- Maintains a history of calculations in the browser session.
-- Updates the history display after each calculation.
+## Example: Creating a Specialized Agent
 
-## Example Calculations
+To create a data analysis agent:
 
-**Average:**
-- Input: `2,4,6` → Output: `4.0`
-- Input: `10,20,30,40` → Output: `25.0`
-- Input: (empty) → Output: `None` (displayed in red)
+1. Create `.opencode/agent/data-analyst.md`:
+```yaml
+---
+description: A data analysis specialist
+mode: primary
+model: navigator/nemotron-3-super-120b-a12b
+tools:
+  read: true
+  write: true
+  edit: true
+  bash: true
+  webfetch: true
+  # Add data-specific tools if available
+---
+You are a data analysis expert. Help users:
+- Clean and preprocess datasets
+- Perform statistical analysis
+- Create data visualizations
+- Interpret results and draw conclusions
+- Explain statistical concepts in simple terms
+```
 
-**Multiply by 2:**
-- Input: `5` → Output: `10`
-- Input: `-3` → Output: `-6`
-- Input: `0` → Output: `0`
+2. Add any required provider/model configuration to `opencode.json`
+3. Set environment variables for API keys
+4. Run and select your new agent
 
-## Extending the Project
+## Best Practices
 
-To add more operations:
-1. Add the function to `calc.py`.
-2. Add a corresponding wrapper function in `calc_history.py` that logs the operation.
-3. Update the HTML interface to include the new operation in the dropdown and add the necessary input fields and calculation logic.
+1. **Start Simple**: Begin with a basic agent and gradually add capabilities
+2. **Be Specific**: Clear instructions lead to better performance
+3. **Limit Tools**: Only grant tools your agent actually needs
+4. **Test Iteratively**: Try your agent with simple tasks first
+5. **Document**: Keep track of what works well for your specific use case
 
-## License
+## Extending with Skills
 
-This project is open source and available under the MIT License.
+Agents can load specialized skills for domains like:
+- Web browsing (`built-in-browser`, `chrome-browser`)
+- File operations (`pdf`, `xlsx`, `docx`, `pptx`)
+- Data analysis and visualization
+- Specific frameworks or languages
 
-## Acknowledgments
+Use the `skill` tool within your agent's instructions or load them automatically based on context.
 
-- Created as part of the "Build an agent" project.
-- Uses standard web technologies (HTML5, CSS3, JavaScript ES6).
+## Troubleshooting
+
+**Agent not responding?**
+- Check that your API key is set correctly
+- Verify the model name matches exactly what's in your provider configuration
+- Ensure the agent file has valid YAML frontmatter
+
+**Tools not working?**
+- Confirm the tool is listed in your agent's `tools:` section
+- Check that any required dependencies are installed
+- Verify file permissions for bash operations
+
+**Model errors?**
+- Ensure the provider is correctly configured
+- Check that the model exists for that provider
+- Verify API credentials and quotas
+
+## Learning More
+
+To explore advanced agent capabilities:
+1. Look at the skills directory for pre-built capabilities
+2. Experiment with different model providers
+3. Try creating subagents for complex tasks using the `task` tool
+4. Use `todowrite` for managing multi-step workflows
+
+This repository serves as a starting point—you can use the calculator project as a testbed for developing and refining your own agents.
+
+---
+
+*Built with OpenCode - Customize, extend, and create AI agents tailored to your specific needs.*
